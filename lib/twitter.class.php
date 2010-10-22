@@ -11,6 +11,18 @@ class Twitter extends TwitterOAuth
     return $this->get($url, array('lite' => $lite));
   }
 
+  function getMentionLastId()
+  {
+    $statusList = $this->getMentions(array('count' => 1));
+    return $statusList[0]->id;
+  }
+
+  function getMentions($params = array())
+  {
+    $url = 'statuses/mentions';
+    return $this->get($url, $params);
+  }
+
   function getFriendsTimeLine($lite = false, $id = null)
   {
     $url = 'statuses/friends_timeline';

@@ -7,12 +7,36 @@ require_once("config.php");
 
 class TwitChat
 {
+  static $mentionLastId;
+
   function __construct(&$irc, &$twitter)
   {
     $irc->setUseSockets(TRUE);
+    $irc->registerTimehandler(IRC_TIMER, $this, 'timer'); 
     $irc->registerActionhandler(SMARTIRC_TYPE_CHANNEL, '^quit$', $this, 'quit');
     $irc->registerActionHandler(SMARTIRC_TYPE_CHANNEL, '.*', $this, 'listen');
     $this->twitter = &$twitter;
+
+    $this->mentionLastId = $this->twitter->getMentionLastId();
+  }
+
+  public function timer(&$irc)
+  {
+    $this->postMentions($irc);
+  }
+
+  public function postMentions(&$irc)
+  {
+    $statusList = $this->twitter->getMentions(array('since_id' => $this->mentionLastId));
+    if (!count($statusList)) return;
+
+    $this->mentionLastId = $statusList[0]->id;
+
+    krsort($statusList);
+    foreach ($statusList as $status)
+    {
+      $irc->message(SMARTIRC_TYPE_INFO, IRC_CHANNEL, $this->decode($status->user->screen_name.'> '.$status->text));
+    }
   }
 
   public function listen(&$irc, &$data)
@@ -37,6 +61,11 @@ class TwitChat
   protected function encode($text)
   {
     return mb_convert_encoding($text, mb_internal_encoding(), IRC_ENCODING);
+  }
+
+  protected function decode($text)
+  {
+    return mb_convert_encoding($text, IRC_ENCODING, mb_internal_encoding());
   }
 
   public static function shortUrls($matches)
