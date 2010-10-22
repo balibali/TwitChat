@@ -45,7 +45,7 @@ class TwitChat
     $message = $this->encode($data->message);
 
     // bit.ly
-    $message = preg_replace_callback('/https?:\/\/(?:[a-zA-Z0-9_\-\/.,:;~?@=+$%#!()]|&amp;)+/', array(__CLASS__, 'shortUrls'), $message);
+    $message = preg_replace_callback('/https?:\/\/(?:[a-zA-Z0-9_\-\/.,:;~?@=+$%#!()]|&amp;)+/', array(__CLASS__, 'shortenUrl'), $message);
 
     // twitter
     $post = $nick.'> '.$message;
@@ -72,11 +72,13 @@ class TwitChat
     return mb_convert_encoding($text, IRC_ENCODING, mb_internal_encoding());
   }
 
-  public static function shortUrls($matches)
+  public static function shortenUrl($matches)
   {
+    $url = $matches[0];
+
     if (defined('BIT_LY_ID') && defined('BIT_LY_API_KEY') && BIT_LY_ID && BIT_LY_API_KEY)
     {
-      $q = 'version=2.0.1&longUrl='.urlencode($matches[0])
+      $q = 'version=2.0.1&longUrl='.urlencode($url)
          . '&login='.BIT_LY_ID.'&apiKey='.BIT_LY_API_KEY;
       $ch = curl_init('http://api.bit.ly/shorten?'.$q);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -86,11 +88,11 @@ class TwitChat
 
       if ('OK' === $result['statusCode'])
       {
-        return $result['results'][$matches[0]]['shortUrl'];
+        return $result['results'][$url]['shortUrl'];
       }
     }
 
-    return $matches[0];
+    return $url;
   }
 }
 
