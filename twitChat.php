@@ -51,7 +51,7 @@ class TwitChat
     $post = $nick.'> '.$message;
     if (mb_strlen($post) > 140)
     {
-      $post = mb_substr($post, 0, 137).'..';
+      $post = mb_substr($post, 0, 138).'..';
     }
 
     $this->twitter->postStatus($post);
