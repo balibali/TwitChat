@@ -41,14 +41,18 @@ class TwitChat
 
   public function listen(&$irc, &$data)
   {
+    $nick    = $this->encode($data->nick);
+    $message = $this->encode($data->message);
+
+    // bit.ly
+    $message = preg_replace_callback('/https?:\/\/(?:[a-zA-Z0-9_\-\/.,:;~?@=+$%#!()]|&amp;)+/', array(__CLASS__, 'shortUrls'), $message);
+
     // twitter
-    $post = $this->encode($data->nick).'> '.$this->encode($data->message);
+    $post = $nick.'> '.$message;
     if (mb_strlen($post) > 140)
     {
       $post = mb_substr($post, 0, 137).'..';
     }
-
-    $post = preg_replace_callback('/https?:\/\/(?:[a-zA-Z0-9_\-\/.,:;~?@=+$%#!()]|&amp;)+/', array(__CLASS__, 'shortUrls'), $post);
 
     $this->twitter->postStatus($post);
   }
