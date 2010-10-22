@@ -86,7 +86,7 @@ class TwitChat
       }
     }
 
-    return $matches;
+    return $matches[0];
   }
 }
 
