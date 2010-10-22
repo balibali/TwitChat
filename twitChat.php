@@ -35,7 +35,7 @@ class TwitChat
     krsort($statusList);
     foreach ($statusList as $status)
     {
-      $irc->message(SMARTIRC_TYPE_INFO, IRC_CHANNEL, $this->decode($status->user->screen_name.'> '.$status->text));
+      $irc->message(SMARTIRC_TYPE_NOTICE, IRC_CHANNEL, $this->decode($status->user->screen_name.'> '.$status->text));
     }
   }
 
